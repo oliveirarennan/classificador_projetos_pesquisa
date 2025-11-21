@@ -1,0 +1,13 @@
+services:
+  classificador-app:
+    build: .
+    container_name: mestrado_classificador
+    ports:
+      - "8025:8025"
+    volumes:
+      # Mapeia a pasta de modelos do seu PC para dentro do container.
+      # Isso evita que você tenha que reconstruir a imagem se mudar apenas o modelo.
+      - ./modelos:/app/modelos
+    environment:
+      - TRANSFORMERS_CACHE=/tmp/transformers_cache
+    restart: unless-stopped
