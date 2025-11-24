@@ -1,11 +1,42 @@
 # app/main.py
+import os
+import secrets
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Form, Request
+from fastapi import Depends, FastAPI, Form, HTTPException, Request, status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from . import core
+
+# --- 1. CONFIGURAÇÃO DE SEGURANÇA ---
+security = HTTPBasic()
+
+
+def verificar_credenciais(credentials: HTTPBasicCredentials = Depends(security)):
+    """
+    Função que intercepta a requisição e verifica usuário/senha.
+    Pega os valores das variáveis de ambiente (definidas no Docker).
+    """
+    # Defina aqui um padrão caso a variável de ambiente não exista
+    usuario_correto = os.getenv("APP_USER", "admin")
+    senha_correta = os.getenv("APP_PASSWORD", "admin")
+
+    # secrets.compare_digest é mais seguro que '==' para evitar ataques de tempo
+    is_user_ok = secrets.compare_digest(credentials.username, usuario_correto)
+    is_pass_ok = secrets.compare_digest(credentials.password, senha_correta)
+
+    if not (is_user_ok and is_pass_ok):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciais Incorretas",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
+
+# --- FIM DA CONFIGURAÇÃO DE SEGURANÇA ---
 
 
 # Evento de vida útil: Carrega modelos antes do app começar
@@ -22,7 +53,7 @@ templates = Jinja2Templates(directory="app/templates")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
-@app.get("/")
+@app.get("/", dependencies=[Depends(verificar_credenciais)])
 def home(request: Request):
     # Carrega a lista do CSV
     lista_exemplos = core.carregar_exemplos_demo()
@@ -33,7 +64,7 @@ def home(request: Request):
     )
 
 
-@app.post("/classificar")
+@app.post("/classificar", dependencies=[Depends(verificar_credenciais)])
 def classificar(request: Request, texto_projeto: str = Form(...)):
     # 1. Pega as predições dos dois modelos
     resultado_rf = core.prever_rf(texto_projeto)
@@ -51,7 +82,7 @@ def classificar(request: Request, texto_projeto: str = Form(...)):
     )
 
 
-@app.post("/analise_lime")
+@app.post("/analise_lime", dependencies=[Depends(verificar_credenciais)])
 def analisar_lime(
     request: Request, texto: str = Form(...), modelo_escolhido: str = Form(...)
 ):

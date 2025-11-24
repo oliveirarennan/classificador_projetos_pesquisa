@@ -89,7 +89,7 @@ DIRETORIO_ATUAL = os.path.dirname(os.path.abspath(__file__))
 
 RAIZ_PROJETO = os.path.dirname(DIRETORIO_ATUAL)
 
-PASTA_MODELOS = os.path.join(RAIZ_PROJETO, "app", "modelos")
+PASTA_MODELOS = os.path.join(RAIZ_PROJETO, "modelos")
 
 
 # --- 2. Função para Carregar Modelos (Chamada ao iniciar) ---
@@ -218,7 +218,7 @@ def carregar_exemplos_demo():
     """
     Lê o CSV de demonstração e retorna uma lista de dicionários para o HTML.
     """
-    caminho_csv = os.path.join(RAIZ_PROJETO, "app", "modelos", "exemplos.csv")
+    caminho_csv = os.path.join(RAIZ_PROJETO, "modelos", "exemplos.csv")
 
     if not os.path.exists(caminho_csv):
         return []
