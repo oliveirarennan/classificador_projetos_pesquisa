@@ -2,6 +2,7 @@
 import os
 import re
 import string
+import time
 
 import joblib
 import numpy as np
@@ -136,20 +137,28 @@ def carregar_modelos():
 
 
 def prever_rf(texto_original):
-    # Limpa
+    inicio = time.time()  #  Inicia o cronômetro
+
     texto_limpo = preprocess_texto_classico(texto_original)
 
-    # Prevê
     if model_rf_pipeline:
         probas = model_rf_pipeline.predict_proba([texto_limpo])[0]
-        # Mapeia usando o dicionário global (assumindo ordem alfabética do sklearn)
-        return {MAPA_CLASSES[i]: float(round(p * 100, 2)) for i, p in enumerate(probas)}
-    return {}
+        resultado = {
+            MAPA_CLASSES[i]: float(round(p * 100, 2)) for i, p in enumerate(probas)
+        }
+    else:
+        resultado = {}
+
+    fim = time.time()  #  Para o cronômetro
+    tempo_total = round(fim - inicio, 4)  # Calcula com 4 casas decimais
+
+    return resultado, tempo_total
 
 
 def prever_bert(texto_original):
-    # Limpa
-    texto_limpo = preprocess_texto_bert(texto=texto_original)
+    inicio = time.time()  # ⏱ Inicia o cronômetro
+
+    texto_limpo = preprocess_texto_bert(texto_original)
 
     if model_bert:
         inputs = tokenizer_bert(
@@ -161,10 +170,19 @@ def prever_bert(texto_original):
         ).to(device)
         with torch.no_grad():
             outputs = model_bert(**inputs)
+
         probs = F.softmax(outputs.logits, dim=1).cpu().numpy()[0]
 
-        return {MAPA_CLASSES[i]: float(round(p * 100, 2)) for i, p in enumerate(probs)}
-    return {}
+        resultado = {
+            MAPA_CLASSES[i]: float(round(p * 100, 2)) for i, p in enumerate(probs)
+        }
+    else:
+        resultado = {}
+
+    fim = time.time()
+    tempo_total = round(fim - inicio, 4)
+
+    return resultado, tempo_total
 
 
 # ==============================================================================

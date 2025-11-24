@@ -31,4 +31,4 @@ COPY . .
 EXPOSE 8025
 
 # Comando para iniciar a aplicação
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8025"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8025", "--timeout-keep-alive", "300"]

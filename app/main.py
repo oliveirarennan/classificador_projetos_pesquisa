@@ -66,18 +66,19 @@ def home(request: Request):
 
 @app.post("/classificar", dependencies=[Depends(verificar_credenciais)])
 def classificar(request: Request, texto_projeto: str = Form(...)):
-    # 1. Pega as predições dos dois modelos
-    resultado_rf = core.prever_rf(texto_projeto)
-    resultado_bert = core.prever_bert(texto_projeto)
+    # Desempacota a tupla: resultado e tempo
+    res_rf, tempo_rf = core.prever_rf(texto_projeto)
+    res_bert, tempo_bert = core.prever_bert(texto_projeto)
 
-    # 2. Renderiza a página de resultados
     return templates.TemplateResponse(
         "resultados.html",
         {
             "request": request,
             "texto_original": texto_projeto,
-            "res_rf": resultado_rf,
-            "res_bert": resultado_bert,
+            "res_rf": res_rf,
+            "tempo_rf": tempo_rf,
+            "res_bert": res_bert,
+            "tempo_bert": tempo_bert,
         },
     )
 
