@@ -73,16 +73,6 @@
             <div style="height: 300px;">
               <canvas id="chartRF"></canvas>
             </div>
-
-            <hr class="my-4" />
-
-            <form action="/analise_lime" method="post" target="_blank" class="d-grid">
-              <input type="hidden" name="texto" value="{{ texto_original }}" />
-              <input type="hidden" name="modelo_escolhido" value="rf" />
-              <button type="submit" class="btn btn-primary">🔍 Explicar com LIME (RF)
-                <br /><small style="font-size: 0.7em;">(Execução lenta...)</small>
-              </button>
-            </form>
           </div>
         </div>
       </div>
@@ -102,17 +92,6 @@
             <div style="height: 300px;">
               <canvas id="chartBERT"></canvas>
             </div>
-
-            <hr class="my-4" />
-
-            <form action="/analise_lime" method="post" target="_blank" class="d-grid">
-              <input type="hidden" name="texto" value="{{ texto_original }}" />
-              <input type="hidden" name="modelo_escolhido" value="bert" />
-              <button type="submit" class="btn btn-outline-danger">
-                🔍 Explicar com LIME (BERT)
-                <br /><small style="font-size: 0.7em;">(Execução lenta...)</small>
-              </button>
-            </form>
           </div>
         </div>
       </div>
@@ -140,15 +119,12 @@
         }
       }
 
-      // AQUI ESTÁ A CORREÇÃO: .toFixed(2) força 2 casas decimais
       return `${winnerClass} (${maxProb.toFixed(2)}%)`;
     }
 
-    // Atualiza os badges
     document.getElementById('rf-winner').innerText = getWinner(dadosRF);
     document.getElementById('bert-winner').innerText = getWinner(dadosBERT);
 
-    // Configuração Comum com DataLabels
     const chartOptions = {
       indexAxis: 'y',
       responsive: true,
@@ -164,7 +140,6 @@
           anchor: 'end',
           align: 'end',
           formatter: function (value) {
-            // Aqui também garantimos 2 casas no gráfico, se quiser
             return parseFloat(value).toFixed(2) + '%';
           },
           font: {
@@ -185,7 +160,6 @@
       }
     };
 
-    // Gráfico RF
     new Chart(document.getElementById('chartRF'), {
       type: 'bar',
       data: {
@@ -201,7 +175,6 @@
       options: chartOptions
     });
 
-    // Gráfico BERT
     new Chart(document.getElementById('chartBERT'), {
       type: 'bar',
       data: {
